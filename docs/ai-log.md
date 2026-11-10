@@ -34,3 +34,30 @@ Format: `[date] [story or topic] — decision or outcome`
 - Create Supabase project.
 - Deploy to Vercel.
 - Sketch and agree on data model as a team.
+
+---
+
+## 2026-11-07 — Session 2: Sprint 0 — Next.js Setup
+
+**What was done:**
+- Planned Sprint 0 completion: Next.js init, shadcn/ui, Supabase client stubs, .env template, Vercel deploy.
+- Taught App Router vs Pages Router, route groups `(auth)`/`(main)`, shadcn/ui model, `@supabase/ssr` vs `@supabase/supabase-js`.
+- User initialized Next.js app manually using default options (no `--src-dir`), so `app/` lives at project root (not `src/app/`).
+- Confirmed clean structure: Next.js 16.4.5, React 19.3.0, Tailwind 4, TypeScript 5.
+- Note: Tailwind v4 has no `tailwind.config.ts` — config lives in `app/globals.css`.
+
+**Sprint 0 status:**
+- [x] Git repo initialized
+- [x] Documentation files created
+- [x] Next.js app initialized
+- [ ] shadcn/ui installed
+- [ ] Supabase client stubs added
+- [ ] `.env.local` template created
+- [ ] Supabase project created (browser)
+- [ ] Vercel deployment
+- [ ] Data model agreed as a team
+
+**Next up:**
+- Step 3: Install shadcn/ui (`npx shadcn@latest init`)
+- Step 4: Install `@supabase/supabase-js`, `@supabase/ssr`, `resend`
+- Step 5–7: Folder structure, env template, Supabase client stubs

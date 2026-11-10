@@ -1,0 +1,128 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* Fonts */
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-bowlby);
+
+  /* shadcn semantic slots → Tailwind utilities */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Slush palette → Tailwind utilities (bg-electric-blue, text-ember, etc.) */
+  --color-carbon: var(--carbon);
+  --color-paper-white: var(--paper-white);
+  --color-sky-wash: var(--sky-wash);
+  --color-concrete-gray: var(--concrete-gray);
+  --color-soft-mist: var(--soft-mist);
+  --color-electric-blue: var(--electric-blue);
+  --color-mint-pop: var(--mint-pop);
+  --color-lavender: var(--lavender);
+  --color-ember: var(--ember);
+  --color-sunburst: var(--sunburst);
+  --color-voltage-violet: var(--voltage-violet);
+
+  /* Marquee animation */
+  --animate-marquee: marquee 26s linear infinite;
+
+  /* Radius scale */
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  /* ── Slush palette ───────────────────────────────────── */
+  --carbon:          #000000; /* primary text, borders, CTA fill */
+  --paper-white:     #ffffff; /* page canvas, card surfaces */
+  --sky-wash:        #dceeff; /* hero / primary section background */
+  --concrete-gray:   #cccccc; /* secondary section background */
+  --soft-mist:       #e9e9e9; /* disabled states, subtle tints */
+  --electric-blue:   #4da2ff; /* decorative accent — NOT for CTAs */
+  --mint-pop:        #55db9c; /* decorative accent */
+  --lavender:        #e9ccff; /* soft accent wash, card fills */
+  --ember:           #fb4903; /* error / destructive */
+  --sunburst:        #ffd731; /* highlight accent */
+  --voltage-violet:  #5c4ade; /* secondary CTA, deep accent */
+
+  /* ── shadcn semantic slots (mapped to Slush) ─────────── */
+  --background:            #ffffff;
+  --foreground:            #000000;
+  --card:                  #ffffff;
+  --card-foreground:       #000000;
+  --popover:               #ffffff;
+  --popover-foreground:    #000000;
+  --primary:               #000000; /* black-fill CTA */
+  --primary-foreground:    #ffffff;
+  --secondary:             #dceeff; /* sky-wash */
+  --secondary-foreground:  #000000;
+  --muted:                 #e9e9e9; /* soft-mist */
+  --muted-foreground:      #666666;
+  --accent:                #e9ccff; /* lavender */
+  --accent-foreground:     #000000;
+  --destructive:           #fb4903; /* ember */
+  --border:                #000000; /* 1px black outlines everywhere */
+  --input:                 #000000;
+  --ring:                  #000000;
+  --radius:                1.25rem; /* 20px — Slush card radius */
+
+  /* ── Sidebar ─────────────────────────────────────────── */
+  --sidebar:                      #ffffff;
+  --sidebar-foreground:           #000000;
+  --sidebar-primary:              #000000;
+  --sidebar-primary-foreground:   #ffffff;
+  --sidebar-accent:               #dceeff;
+  --sidebar-accent-foreground:    #000000;
+  --sidebar-border:               #000000;
+  --sidebar-ring:                 #000000;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee { animation: none; }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}

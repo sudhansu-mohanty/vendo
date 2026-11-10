@@ -21,7 +21,8 @@ We are learning while building. Optimize for understanding, not just output.
 - When we ask for a review, point out security and privacy issues first (see section 8), then correctness, then style.
 - Suggest how to test each story against its acceptance criteria, and write tests where they're cheap.
 - Keep commits small and focused. Use feature branches and pull requests, and write PR descriptions that reference story IDs (for example `E1-S2`).
-- When we finish a slice and ask, help us add 2-4 lines to `LEARNINGS.md` about what we learned.
+- **Start every session by quizzing the user on 3–5 questions from `docs/LEARNINGS.md` before any code or planning. Teach back any missed answers before moving on.**
+- When we finish a slice, add new Q&A entries to `docs/LEARNINGS.md` in the established Q&A format (Q: / A:).
 - Do not add features outside the current sprint scope. If you see a good idea, add it to "Parked ideas" instead.
 - This repo is separate from our other projects. Don't mix code, keys, or Supabase projects with them.
 
