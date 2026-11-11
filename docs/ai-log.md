@@ -9,14 +9,17 @@ Format: `[date] [story or topic] — decision or outcome`
 ## 2026-11-02 — Session 1: Foundation and Documentation
 
 **Context loaded:**
+
 - Read `.mdfiles/CLAUDE.md` — full product context, backlog, sprint plan, and data model draft.
 - Established working preferences: all decisions are the team's; everything built is taught first.
 
 **Decisions made today:**
+
 - Created `docs/` folder with 6 documentation files as living references for the project.
 - Files created: `design.md`, `security-and-auth.md`, `database.md`, `terms-and-conditions.md`, `privacy-policy.md`, `ai-log.md` (this file).
 
 **Open decisions flagged (no decision yet):**
+
 - Magic link vs. password login (decide before sprint 1).
 - Server-side email domain enforcement: auth hook (Option A) vs. DB trigger (Option B) — decide in sprint 1.
 - Listing expiry duration (72 hours suggested from competitive research — TBD).
@@ -30,6 +33,7 @@ Format: `[date] [story or topic] — decision or outcome`
 - Meetup spot names: to be chosen by walking SGW and Loyola campuses.
 
 **Next up (Sprint 0):**
+
 - Set up Next.js app with App Router + TypeScript.
 - Create Supabase project.
 - Deploy to Vercel.
@@ -40,6 +44,7 @@ Format: `[date] [story or topic] — decision or outcome`
 ## 2026-11-07 — Session 2: Sprint 0 — Next.js Setup
 
 **What was done:**
+
 - Planned Sprint 0 completion: Next.js init, shadcn/ui, Supabase client stubs, .env template, Vercel deploy.
 - Taught App Router vs Pages Router, route groups `(auth)`/`(main)`, shadcn/ui model, `@supabase/ssr` vs `@supabase/supabase-js`.
 - User initialized Next.js app manually using default options (no `--src-dir`), so `app/` lives at project root (not `src/app/`).
@@ -47,6 +52,7 @@ Format: `[date] [story or topic] — decision or outcome`
 - Note: Tailwind v4 has no `tailwind.config.ts` — config lives in `app/globals.css`.
 
 **Sprint 0 status:**
+
 - [x] Git repo initialized
 - [x] Documentation files created
 - [x] Next.js app initialized
@@ -58,6 +64,37 @@ Format: `[date] [story or topic] — decision or outcome`
 - [ ] Data model agreed as a team
 
 **Next up:**
+
 - Step 3: Install shadcn/ui (`npx shadcn@latest init`)
 - Step 4: Install `@supabase/supabase-js`, `@supabase/ssr`, `resend`
 - Step 5–7: Folder structure, env template, Supabase client stubs
+
+---
+
+## 2026-11-10 — Session 3: Sprint 0 — Packages + Supabase Stubs
+
+**What was done:**
+
+- Start-of-session quiz: user scored 4/5 — solid retention of App Router, route groups, shadcn model, Tailwind v4. App Router vs Pages Router wording needs reinforcing.
+- Confirmed shadcn/ui was already installed from last session: `components.json` present, `components/ui/button.tsx` generated, config correct for Tailwind v4.
+- Installed three packages: `@supabase/supabase-js` ^2.119.0, `@supabase/ssr` ^0.12.7, `resend` ^6.38.0.
+- 7 moderate npm audit vulnerabilities — all in dev/build tooling, safe to ignore for now.
+
+**Sprint 0 status:**
+
+- [x] Git repo initialized
+- [x] Documentation files created
+- [x] Next.js app initialized
+- [x] shadcn/ui installed
+- [x] `@supabase/supabase-js`, `@supabase/ssr`, `resend` installed
+- [ ] Supabase client stubs added (`lib/supabase/client.ts` + `server.ts`)
+- [ ] `.env.local` template created
+- [ ] Supabase project created (browser)
+- [ ] Vercel deployment
+- [ ] Data model agreed as a team
+
+**Next up:**
+
+- Create `lib/supabase/client.ts` — browser Supabase client
+- Create `lib/supabase/server.ts` — server Supabase client (reads auth cookies)
+- Create `.env.local.example`
