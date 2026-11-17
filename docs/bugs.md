@@ -51,4 +51,47 @@ Created `.github/workflows/ci.yml` — runs `npm ci` → `npm run lint` → `npm
 
 ---
 
+## BUG-002 — Lucide icon components cannot be passed from Server to Client Component
+
+**Date:** 2026-11-17
+**Severity:** Blocking — 500 error, page fails to render
+
+**Symptom:**
+```
+Only plain objects can be passed to Client Components from Server Components.
+{id: "browse", label: "Browse", icon: {$$typeof: ..., render: ...}}
+Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server".
+```
+
+### What happened
+
+`app/page.tsx` was a Server Component (no `"use client"` directive). It defined `NAV_ITEMS` with `icon: Search` and `icon: Tag` from `lucide-react`, then passed the array as a prop to `<NotchNav>`, which is a `"use client"` component.
+
+React's Server/Client boundary only allows **plain serializable data** (strings, numbers, plain objects, arrays) to cross from server to client via props. Lucide icons are React components — objects with a `render` function — which are not serializable.
+
+### Root cause
+
+Missing `"use client"` on `app/page.tsx`. Because the file had no directive, Next.js treated it as a Server Component. As soon as it tried to pass a component reference (the icon) across the RSC boundary to a Client Component, React threw.
+
+### Fix
+
+Added `"use client"` to the top of `app/page.tsx`:
+
+```tsx
+"use client";
+// rest of file...
+```
+
+Since `page.tsx` uses inline SVG icons, Lucide icons in nav items, and will eventually use state/event handlers, it belongs on the client.
+
+### Prevention
+
+Any file that passes component references, functions, or class instances as props to a `"use client"` component must itself be a Client Component (or move the data-with-components definition into the client file). Rule of thumb: if a prop contains anything other than a primitive or plain object, the parent must be `"use client"`.
+
+### Questions added to LEARNINGS.md
+
+- BUG-002-Q1, BUG-002-Q2, BUG-002-Q3
+
+---
+
 <!-- Add new bug entries below in the same format -->

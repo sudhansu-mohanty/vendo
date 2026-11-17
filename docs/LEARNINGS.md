@@ -82,4 +82,15 @@ Format per entry:
 **Q:** What is `ResizeObserver` and why is it used here instead of a window `resize` event listener?
 **A:** `ResizeObserver` fires a callback whenever a specific element changes size — not just when the window resizes. This matters because the hero could resize due to a sidebar opening, a parent layout change, or orientation change on mobile, none of which trigger `window.resize`. It is also more performant since it only watches one element.
 
+## Bug-002 — Server/Client Component boundary
+
+**Q (BUG-002-Q1):** What can and cannot be passed as props from a Server Component to a Client Component?
+**A:** Only plain serializable values: strings, numbers, booleans, plain objects, arrays. You cannot pass functions, class instances, React components, or anything with methods. Lucide icons are React components (objects with a `render` function) — passing them as props from a Server Component throws a runtime error.
+
+**Q (BUG-002-Q2):** What is the fix when you need to pass a component reference (like an icon) as a prop to a `"use client"` component?
+**A:** Add `"use client"` to the file doing the passing. Once that file is a Client Component, all its imports and data stay on the client side — the boundary no longer applies. Alternatively, move the icon out of the data array and render it inside the Client Component directly.
+
+**Q (BUG-002-Q3):** `app/page.tsx` had no `"use client"` directive. What was Next.js treating it as, and why did that cause a 500 error?
+**A:** Next.js treated it as a Server Component (the default). It passed `icon: Search` and `icon: Tag` (Lucide components, i.e. functions) inside the `NAV_ITEMS` array to `<NotchNav>` (a Client Component). React's RSC serialization step tried to serialize those icons for the client bundle, failed because they are functions, and threw a 500. Adding `"use client"` to `page.tsx` moved the whole file to the client and removed the boundary entirely.
+
 <!-- Add new entries below as each sprint/story is completed -->
