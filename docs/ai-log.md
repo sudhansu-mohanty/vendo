@@ -93,8 +93,91 @@ Format: `[date] [story or topic] — decision or outcome`
 - [ ] Vercel deployment
 - [ ] Data model agreed as a team
 
+**What was built:**
+
+- Created `lib/supabase/client.ts` — browser Supabase client using `createBrowserClient`
+- Created `lib/supabase/server.ts` — server Supabase client using `createServerClient` + cookie handling
+- Created `env.local.example` — env var template with comments pointing to where to find each value
+- Confirmed `.env*` is already in `.gitignore` — safe
+
+**Decisions made:**
+
+- Supabase project created by user (URL + anon key to be filled into `.env.local` later)
+- Vercel deployment deferred — user will handle independently
+- Data model meeting deferred — co-founder sync pending
+- Frontend work approved to start on schema-safe pieces: routing structure + auth page shells
+
+**Sprint 0 status:**
+
+- [x] Git repo initialized
+- [x] Documentation files created
+- [x] Next.js app initialized
+- [x] shadcn/ui installed
+- [x] `@supabase/supabase-js`, `@supabase/ssr`, `resend` installed
+- [x] Supabase client stubs added (`lib/supabase/client.ts` + `server.ts`)
+- [x] `.env.local.example` created
+- [x] Supabase project created (browser)
+- [ ] `.env.local` filled in (user to do when ready)
+- [ ] Vercel deployment (user to handle)
+- [ ] Data model agreed as a team (co-founder meeting pending)
+
 **Next up:**
 
-- Create `lib/supabase/client.ts` — browser Supabase client
-- Create `lib/supabase/server.ts` — server Supabase client (reads auth cookies)
-- Create `.env.local.example`
+- Route group structure: `app/(auth)/` and `app/(main)/`
+- Auth page shells: login and signup
+- Shell components: navbar, page wrappers
+
+---
+
+## 2026-11-15 — Session 4: Sprint 0 — Homepage (public landing page)
+
+**What was done:**
+
+- Start-of-session quiz: user scored 5/5 — strong retention across all Sprint 0 concepts.
+- Reviewed `app/page.tsx` — it existed as a visual direction/design demo (Slush style reference with Screen 01/02/03 mockups). Decided to replace it with a real public landing page (Option A).
+- Reviewed `app/layout.tsx` to confirm font setup: Inter (body) and Bowlby One (display) loaded via `next/font/google` as CSS variables `--font-inter` and `--font-bowlby`.
+- Confirmed design system already fully wired in `app/globals.css`: all Slush color tokens, border radii, marquee animation.
+
+**What was built:**
+
+Replaced `app/page.tsx` with the real Vendo public homepage:
+- **Marquee strip** — black bg, looping: "CONCORDIA'S STUDENT MARKETPLACE · FREE LISTINGS · ANONYMOUS BY DEFAULT · CONCORDIA EMAIL ONLY · BUY · SELL · VENDO"
+- **Navbar** — sticky, white bg, 1px black border. Logo left (VENDO in Bowlby One), Browse pill center, Sign up free filled-black pill right.
+- **Hero** — sky-wash (`#dceeff`) background. Display headline "BUY. / SELL. / VENDO." in Bowlby One at clamp(72px–180px), 0.78 line-height. Electric blue SVG ribbon behind text. Three sticker decorations (ember, sunburst, voltage-violet). Tagline + two CTAs.
+- **Features section** — white bg, "WHY VENDO" heading, 3 cards: Free (sunburst) · Anonymous (lavender) · Concordia Only (mint-pop).
+- **Footer** — logo left, tagline center, six color dots right.
+
+**Decisions made:**
+
+- Nav items and buttons are `<span>` for now — routes don't exist yet. Will upgrade to `<Link>` when auth pages are built in Sprint 1.
+- Design reference page (old `page.tsx`) fully replaced — in git history if needed.
+
+**Tech concepts taught this session:**
+
+- `app/page.tsx` as the root route — file-based routing convention
+- `app/layout.tsx` — wraps all pages, where fonts and metadata live
+- `next/font/google` — self-hosted fonts via CSS variables, eliminates layout shift
+- React Server Components — no `"use client"` needed for static/non-interactive pages
+- CSS custom properties in React inline styles — `var(--sky-wash)` resolves from `:root` in globals.css
+- `position: sticky` on nav — stays at top of viewport on scroll, unlike `position: fixed`
+
+**Sprint 0 status:**
+
+- [x] Git repo initialized
+- [x] Documentation files created
+- [x] Next.js app initialized
+- [x] shadcn/ui installed
+- [x] `@supabase/supabase-js`, `@supabase/ssr`, `resend` installed
+- [x] Supabase client stubs added
+- [x] `.env.local.example` created
+- [x] Supabase project created (browser)
+- [x] Public homepage built
+- [ ] `.env.local` filled in (user to do)
+- [ ] Vercel deployment (user to handle)
+- [ ] Data model agreed as a team (co-founder meeting pending)
+
+**Next up:**
+
+- Route group structure: `app/(auth)/` and `app/(main)/`
+- Auth page shells: login and signup
+- Wire nav/CTA buttons to real routes
