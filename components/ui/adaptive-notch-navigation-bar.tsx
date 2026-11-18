@@ -618,7 +618,7 @@ export function NotchNav({
         <div
           className={cn(
             "relative flex w-full items-start h-full justify-center overflow-y-auto overflow-x-hidden",
-            isBottom ? "pt-3 pb-17.5" : "pt-17.5 pb-3"
+            isBottom ? "pt-0 pb-17.5" : "pt-0 pb-10"
           )}
         >
           {children}
