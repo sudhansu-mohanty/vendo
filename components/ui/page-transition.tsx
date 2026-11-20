@@ -1,0 +1,377 @@
+"use client"
+
+import {
+  createContext,
+  useContext,
+  useRef,
+  useState,
+  useLayoutEffect,
+  useEffect,
+  useCallback,
+  type ReactNode,
+} from "react"
+import { useRouter, usePathname } from "next/navigation"
+import { motion } from "framer-motion"
+
+/* ─── Brand colours (index 0 = back/cream, index 4 = front/red) ──────────── */
+
+export const DEFAULT_COLORS = [
+  "#FDF8D9", // cream  — warm neutral (back layer)
+  "#fb4903", // ember  — brand orange
+  "#55db9c", // mint   — brand green (mint-pop)
+  "#286ac3", // blue   — Vendo logo blue
+  "#FF3B30", // red    — accent (front layer)
+]
+
+const EASE: [number, number, number, number] = [0.76, 0, 0.24, 1]
+
+/* ─── Logo animation timing ──────────────────────────────────────────────── */
+
+const LETTER_STAGGER = 0.22   // seconds between letters
+const LETTER_DRAW    = 1.0    // seconds for stroke to trace each letter
+const LETTER_FILL_LAG = 0.55  // seconds after stroke start before fill fades in
+const LETTER_FILL_DUR = 0.55  // seconds for fill opacity transition
+
+// Total seconds the logo animation runs (measured from when it starts).
+// 5 = number of letters in "Vendo"
+const LOGO_ANIM_S = (5 - 1) * LETTER_STAGGER + LETTER_FILL_LAG + LETTER_FILL_DUR
+
+/* ─── Animated Vendo wordmark (shown on white during intro reveal) ───────── */
+
+const LETTER_PATHS = [
+  {
+    transform: "translate(-16.092192, 251.462032)",
+    d: "M 157.3125 46.890625 C 142.8125 46.890625 131.226562 43.5 122.5625 36.71875 C 113.90625 29.9375 108.867188 20.707031 107.453125 9.03125 C 106.046875 -2.632812 108.640625 -15.8125 115.234375 -30.5 L 158.734375 -130.765625 C 164.191406 -143.566406 166.734375 -154.957031 166.359375 -164.9375 C 165.984375 -174.914062 163.15625 -182.773438 157.875 -188.515625 C 152.601562 -194.265625 145.453125 -197.140625 136.421875 -197.140625 C 127.941406 -197.140625 120.59375 -194.503906 114.375 -189.234375 C 108.164062 -183.960938 103.367188 -176.851562 99.984375 -167.90625 C 96.597656 -158.96875 94.710938 -148.753906 94.328125 -137.265625 C 94.140625 -129.546875 95.082031 -123.285156 97.15625 -118.484375 C 99.226562 -113.679688 101.675781 -109.773438 104.5 -106.765625 C 107.320312 -103.753906 109.863281 -101.023438 112.125 -98.578125 C 114.382812 -96.128906 115.515625 -93.300781 115.515625 -90.09375 C 115.515625 -85.957031 114.148438 -82.472656 111.421875 -79.640625 C 108.691406 -76.816406 105.441406 -74.695312 101.671875 -73.28125 C 97.910156 -71.875 94.429688 -71.171875 91.234375 -71.171875 C 81.441406 -71.171875 72.632812 -74.085938 64.8125 -79.921875 C 57 -85.765625 50.785156 -93.488281 46.171875 -103.09375 C 41.566406 -112.695312 39.265625 -123.238281 39.265625 -134.71875 C 39.265625 -150.539062 41.804688 -164.757812 46.890625 -177.375 C 51.972656 -189.988281 58.984375 -200.765625 67.921875 -209.703125 C 76.867188 -218.648438 87.128906 -225.523438 98.703125 -230.328125 C 110.285156 -235.128906 122.570312 -237.53125 135.5625 -237.53125 C 151.007812 -237.53125 164.519531 -234.515625 176.09375 -228.484375 C 187.675781 -222.460938 196.664062 -214.179688 203.0625 -203.640625 C 209.46875 -193.097656 212.8125 -181 213.09375 -167.34375 C 213.375 -153.695312 210.035156 -139.242188 203.078125 -123.984375 L 167.484375 -47.171875 C 162.210938 -35.679688 160.753906 -26.03125 163.109375 -18.21875 C 165.460938 -10.40625 170.78125 -6.5 179.0625 -6.5 C 185.84375 -6.5 192.765625 -9.179688 199.828125 -14.546875 C 206.890625 -19.910156 213.757812 -27.300781 220.4375 -36.71875 C 227.125 -46.132812 233.101562 -56.960938 238.375 -69.203125 C 243.644531 -81.441406 247.832031 -94.429688 250.9375 -108.171875 C 254.050781 -121.921875 255.703125 -135.664062 255.890625 -149.40625 C 255.890625 -158.820312 255.132812 -168.332031 253.625 -177.9375 C 252.125 -187.539062 250.054688 -196.484375 247.421875 -204.765625 C 244.972656 -212.671875 245.300781 -219.210938 248.40625 -224.390625 C 251.507812 -229.566406 256.546875 -232.910156 263.515625 -234.421875 C 271.234375 -235.929688 277.160156 -234.707031 281.296875 -230.75 C 285.441406 -226.789062 288.550781 -221.238281 290.625 -214.09375 C 293.257812 -203.925781 295.234375 -193.519531 296.546875 -182.875 C 297.867188 -172.238281 298.53125 -161.648438 298.53125 -151.109375 C 298.53125 -129.828125 295.988281 -109.394531 290.90625 -89.8125 C 285.820312 -70.226562 278.804688 -52.101562 269.859375 -35.4375 C 260.921875 -18.78125 250.519531 -4.332031 238.65625 7.90625 C 226.789062 20.144531 213.9375 29.703125 200.09375 36.578125 C 186.257812 43.453125 172 46.890625 157.3125 46.890625 Z M 157.3125 46.890625 ",
+  },
+  {
+    transform: "translate(287.533763, 251.462032)",
+    d: "M 62.140625 0 C 49.140625 0 37.882812 -2.539062 28.375 -7.625 C 18.875 -12.707031 11.535156 -19.71875 6.359375 -28.65625 C 1.179688 -37.601562 -1.40625 -47.726562 -1.40625 -59.03125 C -1.40625 -73.15625 1.835938 -86.144531 8.328125 -98 C 14.828125 -109.863281 23.863281 -119.375 35.4375 -126.53125 C 47.019531 -133.6875 60.34375 -137.265625 75.40625 -137.265625 C 88.40625 -137.265625 98.625 -134.390625 106.0625 -128.640625 C 113.5 -122.898438 117.21875 -114.757812 117.21875 -104.21875 C 117.019531 -96.5 114.707031 -89.296875 110.28125 -82.609375 C 105.863281 -75.929688 99.601562 -70.566406 91.5 -66.515625 C 83.40625 -62.460938 73.617188 -60.4375 62.140625 -60.4375 L 53.09375 -60.4375 C 50.269531 -61 48.382812 -60.71875 47.4375 -59.59375 C 46.5 -58.46875 47.160156 -56.867188 49.421875 -54.796875 C 54.691406 -50.085938 62.507812 -47.734375 72.875 -47.734375 C 82.46875 -47.734375 90.515625 -49.285156 97.015625 -52.390625 C 103.515625 -55.492188 109.117188 -59.117188 113.828125 -63.265625 C 118.535156 -67.410156 122.816406 -71.035156 126.671875 -74.140625 C 130.535156 -77.242188 134.441406 -78.796875 138.390625 -78.796875 C 142.722656 -78.796875 146.160156 -77.242188 148.703125 -74.140625 C 151.242188 -71.035156 152.046875 -67.035156 151.109375 -62.140625 C 150.535156 -56.679688 147.847656 -50.421875 143.046875 -43.359375 C 138.253906 -36.296875 131.898438 -29.46875 123.984375 -22.875 C 116.078125 -16.28125 106.851562 -10.816406 96.3125 -6.484375 C 85.769531 -2.160156 74.378906 0 62.140625 0 Z M 56.203125 -86.421875 C 60.722656 -86.421875 65.097656 -87.171875 69.328125 -88.671875 C 73.566406 -90.179688 77.050781 -92.113281 79.78125 -94.46875 C 82.519531 -96.820312 83.789062 -99.222656 83.59375 -101.671875 C 83.59375 -105.066406 80.675781 -106.765625 74.84375 -106.765625 C 69.757812 -106.765625 65.050781 -105.492188 60.71875 -102.953125 C 56.394531 -100.410156 52.628906 -96.972656 49.421875 -92.640625 C 47.546875 -89.816406 47.734375 -88.070312 49.984375 -87.40625 C 52.242188 -86.75 54.316406 -86.421875 56.203125 -86.421875 Z M 56.203125 -86.421875 ",
+  },
+  {
+    transform: "translate(413.5032, 251.462032)",
+    d: "M -0.84375 0 C -8.9375 0 -14.488281 -2.726562 -17.5 -8.1875 C -20.519531 -13.644531 -20.335938 -20.707031 -16.953125 -29.375 L 16.953125 -122.015625 C 19.015625 -127.660156 21.457031 -131.519531 24.28125 -133.59375 C 27.113281 -135.664062 30.597656 -136.703125 34.734375 -136.703125 C 39.253906 -136.703125 42.597656 -136.039062 44.765625 -134.71875 C 46.929688 -133.40625 48.53125 -131.851562 49.5625 -130.0625 C 50.601562 -128.269531 51.59375 -126.664062 52.53125 -125.25 C 53.476562 -123.84375 54.984375 -123.140625 57.046875 -123.140625 C 60.253906 -123.140625 63.222656 -124.410156 65.953125 -126.953125 C 68.679688 -129.492188 71.832031 -132.035156 75.40625 -134.578125 C 78.988281 -137.117188 83.601562 -138.390625 89.25 -138.390625 C 96.96875 -138.390625 103.601562 -135.941406 109.15625 -131.046875 C 114.71875 -126.148438 117.023438 -119.75 116.078125 -111.84375 C 115.328125 -104.875 113.113281 -97.34375 109.4375 -89.25 C 105.769531 -81.15625 102.710938 -73.4375 100.265625 -66.09375 C 98.941406 -61.757812 99.363281 -58.320312 101.53125 -55.78125 C 103.695312 -53.238281 106.570312 -52.0625 110.15625 -52.25 C 113.914062 -52.4375 116.925781 -53.847656 119.1875 -56.484375 C 121.445312 -59.117188 123.519531 -62.175781 125.40625 -65.65625 C 127.289062 -69.144531 129.453125 -72.207031 131.890625 -74.84375 C 134.335938 -77.476562 137.539062 -78.796875 141.5 -78.796875 C 145.269531 -78.796875 148.566406 -77.429688 151.390625 -74.703125 C 154.210938 -71.972656 155.34375 -68.628906 154.78125 -64.671875 C 154.019531 -58.460938 151.898438 -51.6875 148.421875 -44.34375 C 144.941406 -37 140.328125 -29.9375 134.578125 -23.15625 C 128.835938 -16.375 122.109375 -10.816406 114.390625 -6.484375 C 106.671875 -2.160156 98.289062 0 89.25 0 C 79.082031 0 70.84375 -3.054688 64.53125 -9.171875 C 58.226562 -15.296875 55.078125 -23.441406 55.078125 -33.609375 C 55.078125 -39.628906 56.0625 -45.085938 58.03125 -49.984375 C 60.007812 -54.878906 61.988281 -59.304688 63.96875 -63.265625 C 65.945312 -67.222656 66.9375 -70.707031 66.9375 -73.71875 C 66.9375 -75.601562 66.039062 -77.25 64.25 -78.65625 C 62.46875 -80.070312 59.972656 -80.78125 56.765625 -80.78125 C 52.628906 -80.78125 49.003906 -79.363281 45.890625 -76.53125 C 42.785156 -73.707031 39.914062 -68.910156 37.28125 -62.140625 L 23.71875 -23.4375 C 20.707031 -14.78125 17.363281 -8.707031 13.6875 -5.21875 C 10.019531 -1.738281 5.175781 0 -0.84375 0 Z M -0.84375 0 ",
+  },
+  {
+    transform: "translate(542.57958, 251.462032)",
+    d: "M 48.015625 0 C 38.597656 0 30.125 -2.351562 22.59375 -7.0625 C 15.0625 -11.769531 9.128906 -18.171875 4.796875 -26.265625 C 0.472656 -34.359375 -1.6875 -43.585938 -1.6875 -53.953125 C -1.6875 -69.390625 1.367188 -83.367188 7.484375 -95.890625 C 13.597656 -108.410156 21.878906 -118.34375 32.328125 -125.6875 C 42.785156 -133.03125 54.601562 -136.703125 67.78125 -136.703125 C 78.894531 -136.703125 89.253906 -133.878906 98.859375 -128.234375 C 102.617188 -125.785156 105.347656 -126.628906 107.046875 -130.765625 L 129.359375 -192.625 C 132.179688 -200.34375 135.804688 -205.566406 140.234375 -208.296875 C 144.660156 -211.023438 149.128906 -212.390625 153.640625 -212.390625 C 160.796875 -212.390625 165.691406 -209.847656 168.328125 -204.765625 C 170.960938 -199.679688 170.867188 -193.46875 168.046875 -186.125 L 128.796875 -77.390625 C 126.535156 -70.421875 126.109375 -64.675781 127.515625 -60.15625 C 128.929688 -55.632812 132.554688 -53.375 138.390625 -53.375 C 142.722656 -53.375 146.113281 -54.644531 148.5625 -57.1875 C 151.007812 -59.726562 153.222656 -62.691406 155.203125 -66.078125 C 157.179688 -69.472656 159.394531 -72.441406 161.84375 -74.984375 C 164.289062 -77.523438 167.488281 -78.796875 171.4375 -78.796875 C 175.582031 -78.796875 178.972656 -77.429688 181.609375 -74.703125 C 184.242188 -71.972656 185.28125 -68.628906 184.71875 -64.671875 C 183.957031 -58.460938 181.835938 -51.6875 178.359375 -44.34375 C 174.878906 -37 170.265625 -29.9375 164.515625 -23.15625 C 158.773438 -16.375 152.09375 -10.816406 144.46875 -6.484375 C 136.84375 -2.160156 128.414062 0 119.1875 0 C 112.03125 0 106.660156 -1.175781 103.078125 -3.53125 C 99.503906 -5.882812 96.773438 -8.191406 94.890625 -10.453125 C 93.015625 -12.710938 91.132812 -13.84375 89.25 -13.84375 C 87.550781 -13.84375 84.863281 -12.710938 81.1875 -10.453125 C 77.519531 -8.191406 72.957031 -5.882812 67.5 -3.53125 C 62.039062 -1.175781 55.546875 0 48.015625 0 Z M 60.15625 -51.96875 C 64.488281 -51.96875 68.675781 -53.332031 72.71875 -56.0625 C 76.769531 -58.789062 80.113281 -62.320312 82.75 -66.65625 C 85.382812 -70.988281 86.703125 -75.414062 86.703125 -79.9375 C 86.703125 -85.769531 84.628906 -90.519531 80.484375 -94.1875 C 76.347656 -97.863281 71.457031 -99.703125 65.8125 -99.703125 C 58.84375 -99.703125 53.191406 -96.78125 48.859375 -90.9375 C 44.523438 -85.101562 42.359375 -78.515625 42.359375 -71.171875 C 42.359375 -64.578125 44.003906 -59.726562 47.296875 -56.625 C 50.597656 -53.519531 54.882812 -51.96875 60.15625 -51.96875 Z M 60.15625 -51.96875 ",
+  },
+  {
+    transform: "translate(701.594825, 251.462032)",
+    d: "M 49.984375 0 C 34.734375 0 22.210938 -4.753906 12.421875 -14.265625 C 2.628906 -23.773438 -2.265625 -37.285156 -2.265625 -54.796875 L -2.265625 -57.90625 C -1.878906 -68.070312 0.238281 -77.859375 4.09375 -87.265625 C 7.957031 -96.679688 13.226562 -105.109375 19.90625 -112.546875 C 26.59375 -119.984375 34.5 -125.867188 43.625 -130.203125 C 52.757812 -134.535156 62.695312 -136.703125 73.4375 -136.703125 C 86.425781 -136.703125 97.4375 -134.160156 106.46875 -129.078125 C 115.507812 -123.992188 121.539062 -116.835938 124.5625 -107.609375 C 125.875 -103.835938 128.316406 -101.953125 131.890625 -101.953125 C 134.148438 -101.765625 136.691406 -101.953125 139.515625 -102.515625 C 142.347656 -103.085938 144.703125 -103.75 146.578125 -104.5 C 148.273438 -105.0625 149.921875 -105.578125 151.515625 -106.046875 C 153.117188 -106.523438 154.675781 -106.765625 156.1875 -106.765625 C 159.195312 -106.765625 162.113281 -105.867188 164.9375 -104.078125 C 167.769531 -102.285156 169.84375 -98.941406 171.15625 -94.046875 C 172.664062 -89.335938 172.289062 -85.335938 170.03125 -82.046875 C 167.769531 -78.753906 164.191406 -75.882812 159.296875 -73.4375 C 155.523438 -71.550781 150.957031 -69.992188 145.59375 -68.765625 C 140.226562 -67.546875 134.628906 -66.65625 128.796875 -66.09375 C 124.460938 -65.53125 121.726562 -63.363281 120.59375 -59.59375 C 114.757812 -40.007812 105.582031 -25.179688 93.0625 -15.109375 C 80.539062 -5.035156 66.179688 0 49.984375 0 Z M 62.140625 -49.421875 C 65.335938 -49.421875 68.722656 -50.269531 72.296875 -51.96875 C 75.878906 -53.664062 78.988281 -55.925781 81.625 -58.75 C 84.257812 -61.570312 85.578125 -64.675781 85.578125 -68.0625 C 85.578125 -69.570312 84.351562 -71.171875 81.90625 -72.859375 C 79.457031 -74.554688 76.867188 -77.097656 74.140625 -80.484375 C 71.410156 -83.878906 69.476562 -88.585938 68.34375 -94.609375 C 68.15625 -96.304688 67.6875 -97.90625 66.9375 -99.40625 C 66.1875 -100.914062 64.773438 -101.671875 62.703125 -101.671875 C 58.367188 -101.671875 54.550781 -100.117188 51.25 -97.015625 C 47.957031 -93.910156 45.414062 -90.144531 43.625 -85.71875 C 41.84375 -81.289062 40.953125 -77.101562 40.953125 -73.15625 C 40.953125 -67.125 42.878906 -61.660156 46.734375 -56.765625 C 50.597656 -51.867188 55.734375 -49.421875 62.140625 -49.421875 Z M 62.140625 -49.421875 ",
+  },
+]
+
+/**
+ * layerClearDelay — seconds to wait before starting the draw animation,
+ * equal to the time it takes the last color layer to wipe off screen.
+ * This way the writing only begins once the logo is fully revealed.
+ */
+function AnimatedVendoWordmark({ layerClearDelay }: { layerClearDelay: number }) {
+  return (
+    <svg
+      viewBox="0 0 880 310"
+      aria-label="Vendo"
+      style={{ width: "min(72vw, 480px)", display: "block" }}
+    >
+      {LETTER_PATHS.map((p, i) => {
+        const start = layerClearDelay + i * LETTER_STAGGER
+        return (
+          <g key={i} transform={p.transform}>
+            <motion.path
+              d={p.d}
+              fill="#286ac3"
+              stroke="#286ac3"
+              strokeWidth={5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={{ pathLength: 0, fillOpacity: 0 }}
+              animate={{ pathLength: 1, fillOpacity: 1 }}
+              transition={{
+                pathLength: {
+                  delay: start,
+                  duration: LETTER_DRAW,
+                  ease: [0.4, 0, 0.2, 1],
+                },
+                fillOpacity: {
+                  delay: start + LETTER_FILL_LAG,
+                  duration: LETTER_FILL_DUR,
+                  ease: "easeOut",
+                },
+              }}
+            />
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
+/* ─── Context ─────────────────────────────────────────────────────────────── */
+
+interface NavCtxValue {
+  navigate: (href: string) => void
+}
+
+const NavCtx = createContext<NavCtxValue>({ navigate: () => {} })
+
+export function useTransitionRouter() {
+  return useContext(NavCtx)
+}
+
+/* ─── Types ──────────────────────────────────────────────────────────────── */
+
+// idle        – no overlay, page interactive
+// intro       – first-load: layers wipe down, logo on white revealed
+// covering    – route change: layers wipe in from top
+// uncovering  – route change: layers wipe off after route swap
+// writing   – logo path-drawing animation plays on white bg
+// wipe-out  – white bg + colored layers all sweep down together
+// covering  – route change: layers sweep in from top
+// uncovering– route change: layers sweep off bottom after route swap
+type Phase = "idle" | "writing" | "wipe-out" | "covering" | "uncovering"
+
+export interface PageTransitionProviderProps {
+  children: ReactNode
+  /** Colors back → front. Default: 5 brand colours. */
+  colors?: string[]
+  /** Seconds between each layer's start. Default: 0.1 */
+  stagger?: number
+  /** Seconds for each layer to travel across the viewport. Default: 0.8 */
+  duration?: number
+}
+
+/* ─── Provider ───────────────────────────────────────────────────────────── */
+
+export function PageTransitionProvider({
+  children,
+  colors = DEFAULT_COLORS,
+  stagger = 0.1,
+  duration = 0.8,
+}: PageTransitionProviderProps) {
+  const router = useRouter()
+  const pathname = usePathname()
+
+  // Track phase in both state (for renders) and ref (for async closures)
+  const [phase, setPhaseState] = useState<Phase>("idle")
+  const phaseRef = useRef<Phase>("idle")
+
+  // Mounted = client-side only, gates layer rendering to prevent SSR mismatch
+  const [mounted, setMounted] = useState(false)
+
+  const pathnameRef = useRef(pathname)
+  const reducedRef = useRef(false)
+  const navigatingRef = useRef(false)
+
+  function setPhase(p: Phase) {
+    phaseRef.current = p
+    setPhaseState(p)
+  }
+
+  // ms for all layers (including white bg) to finish sweeping down
+  // n+1 entries: white bg (delay=0) + n colored (delay=1..n×stagger)
+  const wipeDurationMs = (colors.length * stagger + duration) * 1000
+  // For covering/uncovering (no white bg layer, n colored only)
+  const totalMs = useCallback(
+    () => ((colors.length - 1) * stagger + duration) * 1000,
+    [colors.length, stagger, duration],
+  )
+
+  /* ── Mount: check reduced-motion + session, kick off intro if needed ── */
+  useLayoutEffect(() => {
+    reducedRef.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    // Remove FOUC-prevention attribute set by the inline <script> in layout.tsx
+    document.documentElement.removeAttribute("data-intro")
+    setMounted(true)
+
+    const isDev = process.env.NODE_ENV === "development"
+    if (reducedRef.current || (!isDev && sessionStorage.getItem("vendo-intro-seen"))) {
+      setPhase("idle")
+      return
+    }
+
+    // Step 1: writing animation
+    setPhase("writing")
+
+    // Step 2: after writing finishes, start the wipe-out
+    let t2: ReturnType<typeof window.setTimeout>
+    const t1 = window.setTimeout(() => {
+      setPhase("wipe-out")
+
+      // Step 3: after all layers clear, go idle
+      t2 = window.setTimeout(() => {
+        if (!isDev) sessionStorage.setItem("vendo-intro-seen", "1")
+        setPhase("idle")
+      }, wipeDurationMs + 300)
+    }, LOGO_ANIM_S * 1000 + 200)  // 200ms pause so the fully-drawn logo sits briefly
+
+    return () => {
+      window.clearTimeout(t1)
+      window.clearTimeout(t2)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* ── Pathname change: new route loaded while covering → start uncovering ── */
+  useEffect(() => {
+    if (pathname === pathnameRef.current) return
+    pathnameRef.current = pathname
+    if (phaseRef.current === "covering") {
+      // Brief pause lets the new page render before we reveal it
+      window.setTimeout(() => setPhase("uncovering"), 60)
+    }
+  }, [pathname])
+
+  /* ── Uncovering → idle after animation completes ── */
+  useEffect(() => {
+    if (phase !== "uncovering") return
+    const timer = window.setTimeout(() => {
+      setPhase("idle")
+      navigatingRef.current = false
+    }, totalMs() + 300)
+    return () => window.clearTimeout(timer)
+  }, [phase, totalMs])
+
+  /* ── Scroll + pointer lock while animating ── */
+  useEffect(() => {
+    if (phase !== "idle") {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
+    }
+    return () => {
+      document.body.style.overflow = ""
+    }
+  }, [phase])
+
+  /* ── Navigate with wipe transition ── */
+  const navigate = useCallback(
+    async (href: string) => {
+      if (navigatingRef.current) return
+      if (reducedRef.current) {
+        router.push(href)
+        return
+      }
+      if (href === pathnameRef.current) return
+
+      navigatingRef.current = true
+      setPhase("covering")
+
+      // Wait for all layers to fully cover the screen
+      await new Promise<void>((r) => window.setTimeout(r, totalMs() + 80))
+
+      router.push(href)
+
+      // Safety fallback: if pathname doesn't change (e.g. same-page anchor), still uncover
+      window.setTimeout(() => {
+        if (phaseRef.current === "covering") {
+          setPhase("uncovering")
+          window.setTimeout(() => {
+            setPhase("idle")
+            navigatingRef.current = false
+          }, totalMs() + 300)
+        }
+      }, 1500)
+    },
+    [router, totalMs],
+  )
+
+  /* ── Render ── */
+  const isAnimating = phase !== "idle"
+  // White bg + logo: visible during writing AND wipe-out
+  const showIntroBg  = mounted && (phase === "writing" || phase === "wipe-out")
+  // Colored layers: visible during wipe-out and route transitions
+  const showColorLayers = mounted && (phase === "wipe-out" || phase === "covering" || phase === "uncovering")
+
+  return (
+    <NavCtx.Provider value={{ navigate }}>
+      {/* Page content — pointer events blocked while layers are over it */}
+      <div
+        style={{ pointerEvents: isAnimating ? "none" : undefined }}
+        aria-hidden={isAnimating ? true : undefined}
+      >
+        {children}
+      </div>
+
+      {/*
+       * White backdrop + animated wordmark.
+       * z=9999 (highest) so it sits above the colored layers.
+       * During "writing": stays at y=0.
+       * During "wipe-out": sweeps down to y=100% as the leading layer.
+       * When phase → idle it's already off-screen so unmounting is invisible.
+       */}
+      {showIntroBg && (
+        <motion.div
+          key="intro-bg"
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            backgroundColor: "#fff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "none",
+            willChange: "transform",
+          }}
+          animate={{ y: phase === "wipe-out" ? "100%" : "0%" }}
+          transition={
+            phase === "wipe-out"
+              ? { duration, delay: 0, ease: EASE }
+              : { duration: 0 }
+          }
+        >
+          {/* Writing animation starts immediately (layerClearDelay=0) */}
+          <AnimatedVendoWordmark layerClearDelay={0} />
+        </motion.div>
+      )}
+
+      {/*
+       * Colored layers.
+       * z=9998 — behind the white bg during wipe-out so they're revealed
+       * progressively as the white bg slides down past them.
+       *
+       * Stagger for wipe-out / uncovering (exit, sweeping down):
+       *   white bg goes first (delay=0, handled above).
+       *   red (front, i=4) next → (colors.length - i) × stagger = 1×stagger
+       *   cream (back,  i=0) last → (colors.length - i) × stagger = 5×stagger
+       *
+       * Stagger for covering (enter, sweeping in from top):
+       *   back-to-front: cream first (i×stagger), red last
+       */}
+      {showColorLayers && (
+        <div
+          aria-hidden
+          data-transition-overlay
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9998,
+            pointerEvents: "none",
+          }}
+        >
+          {colors.map((color, i) => {
+            const isExit = phase === "wipe-out" || phase === "uncovering"
+            const delay = isExit
+              ? (colors.length - i) * stagger   // red first (i=4 → 1×stagger), cream last
+              : i * stagger                      // covering: cream first, red last
+
+            return (
+              <motion.div
+                key={`${phase}-${i}`}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  zIndex: i, // cream=0 (back), red=4 (front)
+                  backgroundColor: color,
+                  willChange: "transform",
+                }}
+                initial={{ y: isExit ? "0%" : "-100%" }}
+                animate={{ y: isExit ? "100%" : "0%" }}
+                transition={{ duration, delay, ease: EASE }}
+              />
+            )
+          })}
+        </div>
+      )}
+    </NavCtx.Provider>
+  )
+}

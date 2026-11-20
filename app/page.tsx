@@ -6,7 +6,6 @@ import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { TiltedGridHero } from "@/components/ui/tilted-grid-hero"
 import { NotchNav } from "@/components/ui/adaptive-notch-navigation-bar"
 import type { NotchItemData } from "@/components/ui/adaptive-notch-navigation-bar"
-import { IntroScreen } from "@/components/ui/intro-screen"
 import { Search, Tag } from "lucide-react"
 
 
@@ -250,11 +249,8 @@ const NavRight = (
 /* ─── Page ───────────────────────────────────────────────────────────────── */
 
 export default function Home() {
-  const [showIntro, setShowIntro] = useState(true)
-
   return (
     <>
-      {showIntro && <IntroScreen onDone={() => setShowIntro(false)} />}
       <NotchNav
       items={NAV_ITEMS}
       defaultActiveId="browse"

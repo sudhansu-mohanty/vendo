@@ -28,6 +28,17 @@ const LETTERS = [
   },
 ]
 
+/* ─── Timing constants ───────────────────────────────────────────────────── */
+
+// Each letter starts STAGGER seconds after the previous one
+const STAGGER = 0.22
+// How long the stroke takes to trace each letter
+const DRAW = 1.0
+// Fill begins fading in this many seconds after the stroke starts
+const FILL_LAG = 0.55
+// Outer container fades out after the last letter's fill is settled
+const FADE_DELAY = (LETTERS.length - 1) * STAGGER + DRAW + 0.3
+
 /* ─── Intro Screen ───────────────────────────────────────────────────────── */
 
 export function IntroScreen({ onDone }: { onDone: () => void }) {
@@ -44,32 +55,43 @@ export function IntroScreen({ onDone }: { onDone: () => void }) {
       }}
       initial={{ opacity: 1 }}
       animate={{ opacity: 0 }}
-      transition={{ duration: 1.2, delay: 2.0 }}
+      transition={{ duration: 0.7, delay: FADE_DELAY }}
       onAnimationComplete={onDone}
     >
       <svg
-        viewBox="0 0 880 243"
+        viewBox="0 0 880 310"
         style={{ width: "min(78vw, 560px)", overflow: "visible", display: "block" }}
         aria-label="Vendo"
       >
-        {LETTERS.map((letter, i) => (
-          <motion.g
-            key={i}
-            fill="#286ac3"
-            fillOpacity={1}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              delay: i * 0.08,
-              duration: 0.3,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-          >
-            <g transform={letter.transform}>
-              <path d={letter.d} />
+        {LETTERS.map((letter, i) => {
+          const start = i * STAGGER
+          return (
+            <g key={i} transform={letter.transform}>
+              <motion.path
+                d={letter.d}
+                fill="#286ac3"
+                stroke="#286ac3"
+                strokeWidth={5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                initial={{ pathLength: 0, fillOpacity: 0 }}
+                animate={{ pathLength: 1, fillOpacity: 1 }}
+                transition={{
+                  pathLength: {
+                    delay: start,
+                    duration: DRAW,
+                    ease: [0.4, 0, 0.2, 1],
+                  },
+                  fillOpacity: {
+                    delay: start + FILL_LAG,
+                    duration: 0.55,
+                    ease: "easeOut",
+                  },
+                }}
+              />
             </g>
-          </motion.g>
-        ))}
+          )
+        })}
       </svg>
     </motion.div>
   )

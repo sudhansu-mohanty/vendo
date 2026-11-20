@@ -1,6 +1,21 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/*
+ * FOUC prevention: while the inline <script> in layout.tsx has set
+ * data-intro="1" (first-time visitors only, before React hydrates),
+ * hide the page body content so there's no flash before the transition
+ * layers mount. The [data-transition-overlay] element is exempted so
+ * the layers themselves are always visible. Removed by PageTransitionProvider
+ * in useLayoutEffect once the client is in control.
+ */
+html[data-intro="1"] body > *:not([data-transition-overlay]) {
+  visibility: hidden;
+}
+html[data-intro="1"] [data-transition-overlay] {
+  visibility: visible;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
